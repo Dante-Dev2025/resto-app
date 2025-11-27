@@ -37,7 +37,7 @@ $email = isset($email) ? $email : $ci->session->userdata('email');
             <div>
                 <div class="h-16 flex items-center px-6 border-b border-gray-100">
                     <div class="flex items-center gap-2 font-bold text-xl text-gray-800">
-                        <i class="fa-solid fa-burger text-indigo-600"></i>
+                        <i class="fa-solid fa-utensils text-indigo-600"></i>
                         <span>RESTO APP</span>
                     </div>
                 </div>

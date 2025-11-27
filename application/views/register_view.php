@@ -27,9 +27,9 @@
         <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative">
             
             <div class="mb-6">
-                <div class="flex items-center gap-2 font-bold text-2xl text-indigo-600 mb-2">
-                    <i class="fa-solid fa-shapes"></i>
-                    <span>MY APP</span>
+                <div class="flex items-center gap-2 font-black text-2xl text-green-600 mb-3 tracking-tight">
+                    <i class="fa-solid fa-utensils"></i> <!-- Ikon Garpu & Sendok -->
+                    <span>RESTO APP</span> <!-- Teks Baru -->
                 </div>
                 <h1 class="text-3xl font-bold text-gray-800">Buat Akun Baru</h1>
                 <p class="text-gray-500 mt-2">Lengkapi data diri Anda untuk bergabung.</p>
@@ -95,7 +95,7 @@
             </div>
 
             <div class="mt-auto pt-4 text-center text-xs text-gray-400">
-                &copy; 2024 My App System. All rights reserved.
+                &copy; 2025 Resto App System. All rights reserved.
             </div>
         </div>
 

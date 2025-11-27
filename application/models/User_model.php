@@ -9,8 +9,18 @@ class User_model extends CI_Model {
         return $this->db->get('users')->row();
     }
 
+    // [UPDATED] Register dengan Pengecekan Duplikat
     public function register($data)
     {
+        // 1. Cek dulu apakah email sudah ada di database
+        $this->db->where('email', $data['email']);
+        $query = $this->db->get('users');
+
+        if ($query->num_rows() > 0) {
+            return FALSE; // Gagal: Email sudah ada
+        }
+
+        // 2. Jika tidak ada, baru jalankan insert
         return $this->db->insert('users', $data);
     }
 
@@ -26,7 +36,6 @@ class User_model extends CI_Model {
         return $this->db->update('users', ['role' => $new_role]);
     }
 
-    // --- [BARU] FUNGSI GANTI PASSWORD ---
     public function update_password($email, $new_password_hash)
     {
         $this->db->where('email', $email);
