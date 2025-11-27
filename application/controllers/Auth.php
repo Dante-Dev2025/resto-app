@@ -1,20 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+// --- CONTROLLER: Auth ---
+// Mengelola autentikasi pengguna termasuk login, registrasi, logout, dan reset password.
+// Bertanggung jawab atas validasi kredensial, enkripsi password, dan manajemen sesi.
+
 class Auth extends CI_Controller {
 
     public function __construct()
     {
         parent::__construct();
-        
-        // --- TAMBAHKAN BARIS INI JUGA ---
         $this->load->library('session');
-        // --------------------------------
-        
         $this->load->model('User_model');
     }
 
-    // 1. HALAMAN LOGIN
+    // --- FUNGSI: Halaman Login ---
+    // Menampilkan halaman login jika belum login, atau mengarahkan ke dashboard jika sudah login.
+    // Input: Tidak ada (cek session).
+    // Output: View login atau redirect ke dashboard.
     public function index() {
         if ($this->session->userdata('logged_in')) {
             $this->redirect_based_on_role();
@@ -23,9 +26,11 @@ class Auth extends CI_Controller {
         }
     }
 
-    // 2. PROSES LOGIN
+    // --- FUNGSI: Proses Login ---
+    // Memvalidasi email dan password, mengatur sesi jika berhasil, atau menampilkan error.
+    // Input: email (string), password (string) dari form POST.
+    // Output: Redirect ke dashboard atau kembali ke login dengan pesan error.
     public function process_login() {
-        // Ambil input dengan XSS Filtering (TRUE)
         $email = $this->input->post('email', TRUE);
         $password = $this->input->post('password');
 
@@ -33,7 +38,6 @@ class Auth extends CI_Controller {
 
         if ($user) {
             if (password_verify($password, $user->password)) {
-                // Set Session
                 $session_data = [
                     'user_id'   => $user->id,
                     'name'      => $user->name,
@@ -53,10 +57,12 @@ class Auth extends CI_Controller {
         }
     }
 
-    // 3. LOGIC REDIRECT ROLE
+    // --- FUNGSI: Redirect Berdasarkan Role ---
+    // Mengarahkan pengguna ke dashboard sesuai role, atau logout jika role tidak valid.
+    // Input: Role dari session.
+    // Output: Redirect ke dashboard atau logout.
     private function redirect_based_on_role() {
         $role = $this->session->userdata('role');
-        // Semua role yang valid masuk ke dashboard, logic pemisahan ada di Dashboard.php
         if (in_array($role, ['admin', 'cashier', 'guest'])) {
             redirect('dashboard');
         } else {
@@ -64,25 +70,30 @@ class Auth extends CI_Controller {
         }
     }
 
-    // 4. HALAMAN REGISTER
+    // --- FUNGSI: Halaman Registrasi ---
+    // Menampilkan form registrasi untuk pengguna baru.
+    // Input: Tidak ada.
+    // Output: View registrasi.
     public function register() {
         $this->load->view('register_view');
     }
 
-    // 5. PROSES REGISTER
+    // --- FUNGSI: Proses Registrasi ---
+    // Membuat akun baru dengan role default 'guest', mengenkripsi password.
+    // Input: name (string), email (string), password (string) dari form POST.
+    // Output: Redirect ke login dengan pesan sukses atau error.
     public function process_register() {
         $name = $this->input->post('name', TRUE);
         $email = $this->input->post('email', TRUE);
         $password = $this->input->post('password');
 
-        // Enkripsi Password
         $encrypted_password = password_hash($password, PASSWORD_BCRYPT);
 
         $data = [
             'name' => $name,
             'email' => $email,
             'password' => $encrypted_password,
-            'role' => 'guest' // Default role
+            'role' => 'guest'
         ];
 
         if ($this->User_model->register($data)) {
@@ -94,19 +105,28 @@ class Auth extends CI_Controller {
         }
     }
 
-    // 6. LOGOUT
+    // --- FUNGSI: Logout ---
+    // Menghancurkan sesi dan mengarahkan ke halaman login.
+    // Input: Tidak ada.
+    // Output: Redirect ke login.
     public function logout() {
         $this->session->sess_destroy();
         redirect('auth');
     }
 
-    // --- FITUR LUPA PASSWORD ---
-
+    // --- FUNGSI: Halaman Lupa Password ---
+    // Menampilkan form untuk meminta reset password.
+    // Input: Tidak ada.
+    // Output: View forgot password.
     public function forgot_password()
     {
         $this->load->view('forgot_password_view');
     }
 
+    // --- FUNGSI: Verifikasi Reset Password ---
+    // Memeriksa apakah email terdaftar, lalu menampilkan form reset.
+    // Input: email (string) dari form POST.
+    // Output: View reset password atau redirect dengan error.
     public function verify_reset()
     {
         $email = $this->input->post('email', TRUE);
@@ -121,6 +141,10 @@ class Auth extends CI_Controller {
         }
     }
 
+    // --- FUNGSI: Proses Reset Password ---
+    // Mengupdate password baru yang dienkripsi untuk email yang diverifikasi.
+    // Input: email (string), password (string) dari form POST.
+    // Output: Redirect ke login dengan pesan sukses atau error.
     public function process_reset_password()
     {
         $email = $this->input->post('email', TRUE);

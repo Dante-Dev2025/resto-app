@@ -1,11 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-// Use get_instance() to safely access CI resources if $this isn't working or variables aren't passed
+// --- VIEW: Dashboard Layout ---
+// Menampilkan struktur layout utama aplikasi dengan sidebar dinamis berdasarkan role pengguna (Admin/Kasir/Guest),
+// header dengan info pengguna, dan sistem Global Popup (Alert/Confirm) untuk notifikasi interaktif.
+
 $ci =& get_instance();
 $role = isset($role) ? $role : $ci->session->userdata('role');
 $name = isset($name) ? $name : $ci->session->userdata('name');
-$email = isset($email) ? $email : $ci->session->userdata('email'); 
+$email = isset($email) ? $email : $ci->session->userdata('email');
 ?>
 <!DOCTYPE html>
 <html lang="id">

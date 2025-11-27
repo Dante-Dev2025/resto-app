@@ -1,7 +1,11 @@
+<!-- --- VIEW: Self Service View ---
+Menampilkan logika keranjang belanja (Cart) di JS, alur pemilihan meja visual,
+fitur cetak struk, dan proses checkout dengan validasi stok dan pembayaran. -->
+
 <!-- 1. DATA PHP KE JAVASCRIPT -->
 <script>
     const menuData = <?php echo json_encode($menu_makanan); ?>;
-    let occupiedTables = []; 
+    let occupiedTables = [];
 </script>
 
 <!-- STYLE KHUSUS PRINT (Agar Tampilan Web Hilang, Sisa Struk Doang) -->

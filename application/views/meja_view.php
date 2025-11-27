@@ -1,3 +1,7 @@
+<!-- --- VIEW: Meja View ---
+Menampilkan grid denah meja dengan status visual (kosong/merah terisi),
+kontrol admin untuk menambah/kurangi jumlah meja, dan fungsi JS untuk mengosongkan meja. -->
+
 <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
     <div>
         <h2 class="text-2xl font-bold text-gray-800">Manajemen Meja</h2>

@@ -1,35 +1,44 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+// --- KELAS: Dashboard Controller ---
+// Mengelola halaman utama dan navigasi berdasarkan role pengguna.
+// Hanya bisa diakses oleh pengguna yang sudah login.
+
 class Dashboard extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->library('session'); 
+        $this->load->library('session');
         $this->load->helper('url');
-        $this->load->model('User_model'); 
+        $this->load->model('User_model');
         $this->load->model('Product_model');
         $this->load->model('Order_model');
-        $this->load->model('Settings_model'); 
+        $this->load->model('Settings_model');
 
         if (!$this->session->userdata('logged_in')) redirect('auth');
     }
 
-    // ... (Fungsi index, meja, add_table_action TETAP SAMA) ...
+    // --- FUNGSI: Halaman Utama Dashboard ---
+    // Mengarahkan pengguna ke halaman sesuai role mereka (admin, cashier, atau guest).
     public function index() {
         $role = $this->session->userdata('role');
-        if ($role == 'admin') $this->stok(); 
-        elseif ($role == 'cashier') $this->pesanan(); 
+        if ($role == 'admin') $this->stok();
+        elseif ($role == 'cashier') $this->pesanan();
         else $this->self_service();
     }
 
+    // --- FUNGSI: Halaman Manajemen Meja ---
+    // Menampilkan denah meja dan kontrol untuk admin/cashier.
     public function meja() {
         $this->_check_access(['admin', 'cashier']);
         $data['busy_tables'] = $this->Order_model->get_busy_tables();
-        $data['total_tables'] = $this->Settings_model->get_total_tables(); 
+        $data['total_tables'] = $this->Settings_model->get_total_tables();
         $this->_render('meja_view', 'Manajemen Meja', $data);
     }
 
+    // --- FUNGSI: Tambah Meja Baru ---
+    // Menambah jumlah meja total di pengaturan (hanya admin).
     public function add_table_action() {
         $this->_check_access(['admin']);
         $current = $this->Settings_model->get_total_tables();
@@ -68,7 +77,8 @@ class Dashboard extends CI_Controller {
         }
     }
 
-    // ... (SISA FUNGSI LAIN BIARKAN SAMA SEPERTI SEBELUMNYA) ...
+    // --- FUNGSI: Kosongkan Meja ---
+    // Mengubah status pesanan di meja menjadi 'finished' (admin/cashier).
     public function clear_table_action() {
         $this->_check_access(['admin', 'cashier']);
         $table = $this->input->post('table_number');
@@ -79,6 +89,8 @@ class Dashboard extends CI_Controller {
         }
     }
     
+    // --- FUNGSI: Halaman Stok & Menu ---
+    // Menampilkan laporan stok produk dan kontrol untuk admin.
     public function stok() {
         $this->_check_access(['admin']);
         $data['stok_barang'] = $this->Product_model->get_all_products();
@@ -88,11 +100,13 @@ class Dashboard extends CI_Controller {
         $this->_render('stok_view', 'Perhitungan Stok', $data);
     }
 
+    // --- FUNGSI: Halaman Daftar Pesanan ---
+    // Menampilkan pesanan dengan filter status dan tanggal (admin/cashier).
     public function pesanan() {
         $this->_check_access(['admin', 'cashier']);
         $date = $this->input->get('date');
         $status = $this->input->get('status');
-        if (!$status) $status = 'process'; 
+        if (!$status) $status = 'process';
 
         $orders = $this->Order_model->get_filtered_orders($date, $status);
         $data['pesanan'] = [];
@@ -109,13 +123,15 @@ class Dashboard extends CI_Controller {
         $this->_render('pesanan_view', 'Daftar Pesanan', $data);
     }
 
+    // --- FUNGSI: Halaman Riwayat & Income ---
+    // Menampilkan laporan pendapatan dan riwayat pesanan (hanya admin).
     public function riwayat() {
         $this->_check_access(['admin']);
         $filter_date = $this->input->get('date');
         $data['income_today'] = $this->Order_model->get_income_today();
         $data['income_weekly'] = $this->Order_model->get_income_weekly();
         $data['income_monthly'] = $this->Order_model->get_income_monthly();
-        
+
         if ($filter_date) {
             $data['income_filtered'] = $this->Order_model->get_income_by_date($filter_date);
             $data['riwayat'] = $this->Order_model->get_filtered_orders($filter_date, null);
@@ -127,6 +143,8 @@ class Dashboard extends CI_Controller {
         $this->_render('riwayat_view', 'Riwayat Transaksi', $data);
     }
 
+    // --- FUNGSI: Halaman Self Service ---
+    // Menampilkan menu untuk pelanggan memesan sendiri (admin/guest).
     public function self_service() {
         $this->_check_access(['admin', 'guest']);
         $raw = $this->Product_model->get_all_products();
@@ -137,7 +155,9 @@ class Dashboard extends CI_Controller {
         $data['menu_makanan'] = json_decode(json_encode($filtered));
         $this->_render('self_service_view', 'Menu Restoran', $data);
     }
-    
+
+    // --- FUNGSI: Halaman Kelola Pengguna ---
+    // Menampilkan daftar semua pengguna untuk admin.
     public function users() {
         $this->_check_access(['admin']);
         $data['all_users'] = $this->User_model->get_all_users();
@@ -175,6 +195,8 @@ class Dashboard extends CI_Controller {
         else echo json_encode(['status'=>'error']);
     }
 
+    // --- FUNGSI: Ubah Role Pengguna ---
+    // Mengubah role pengguna (hanya admin, tidak bisa ubah diri sendiri).
     public function change_role() {
         $this->_check_access(['admin']);
         $user_id = $this->input->post('user_id', TRUE);
@@ -184,6 +206,8 @@ class Dashboard extends CI_Controller {
         redirect('dashboard/users');
     }
 
+    // --- FUNGSI: Simpan Produk ---
+    // Menambah atau mengupdate data produk (hanya admin).
     public function save_product() {
         if ($this->session->userdata('role') !== 'admin') { echo json_encode(['status'=>'error']); return; }
         $id = $this->input->post('id', TRUE);
@@ -192,16 +216,22 @@ class Dashboard extends CI_Controller {
         echo json_encode(['status'=>$status?'success':'error']);
     }
 
+    // --- FUNGSI: Hapus Produk ---
+    // Menghapus produk dari database (hanya admin).
     public function delete_product() {
         if ($this->session->userdata('role') !== 'admin') return;
         $id = $this->input->post('id', TRUE);
         echo json_encode(['status'=> $this->Product_model->delete($id)?'success':'error']);
     }
 
+    // --- FUNGSI: Detail Pesanan ---
+    // Mengambil detail pesanan dan itemnya untuk modal.
     public function get_order_detail($id) {
         echo json_encode(['order'=>$this->Order_model->get_order_by_id($id), 'items'=>$this->Order_model->get_order_items($id)]);
     }
 
+    // --- FUNGSI: Selesaikan Pesanan ---
+    // Mengubah status pesanan menjadi 'served' (sudah disajikan).
     public function complete_order() {
         $id = $this->input->post('id', TRUE);
         echo json_encode(['status'=> $this->Order_model->update_status($id, 'served')?'success':'error']);
